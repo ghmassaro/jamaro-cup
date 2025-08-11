@@ -5,115 +5,115 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jamaro FTV - Inscrição</title>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
-  header {
-    background-color: #000;
-    padding: 20px;
-  }
-  header img {
-    height: 100px;
-  }
-  h1 {
-    color: #333;
-    margin-top: 20px;
-    font-size: 24px;
-  }
-  nav a {
-    text-decoration: none;
-    color: #000;
-    font-weight: bold;
-    display: inline-block;
-    margin: 20px 0;
-  }
-  form {
-    max-width: 95%;
-    width: 100%;
-    max-width: 700px;
-    margin: 30px auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    text-align: left;
-  }
-  fieldset {
-    border: none;
-    border-left: 4px solid #fdd835;
-    padding: 20px 20px 10px;
-    margin-bottom: 30px;
-    border-radius: 8px;
-    background: #fafafa;
-  }
-  legend {
-    font-weight: bold;
-    font-size: 18px;
-    color: #222;
-    margin-bottom: 10px;
-  }
-  label {
-    display: block;
-    margin: 12px 0 6px;
-    font-weight: 600;
-    color: #444;
-  }
-  input,
-  select {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-    transition: border 0.3s ease;
-  }
-  input:focus,
-  select:focus {
-    border-color: #fdd835;
-    outline: none;
-  }
-  .termo {
-    font-size: 14px;
-    background: #fff8dc;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    border: 1px solid #e1c870;
-    max-height: 200px;
-    overflow-y: auto;
-    line-height: 1.5;
-  }
-  button {
-    background-color: #fdd835;
-    border: none;
-    padding: 14px 24px;
-    color: #000;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 6px;
-    display: block;
-    margin: 0 auto;
-    transition: background-color 0.3s ease;
-  }
-  button:disabled {
-    background-color: #ddd;
-    cursor: not-allowed;
-  }
-  button:hover:not(:disabled) {
-    background-color: #fbc02d;
-  }
-  @media (max-width: 480px) {
-    form {
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #000;
       padding: 20px;
     }
-  }
-</style>
+    header img {
+      height: 100px;
+    }
+    h1 {
+      color: #333;
+      margin-top: 20px;
+      font-size: 24px;
+    }
+    nav a {
+      text-decoration: none;
+      color: #000;
+      font-weight: bold;
+      display: inline-block;
+      margin: 20px 0;
+    }
+    form {
+      max-width: 95%;
+      width: 100%;
+      max-width: 700px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      text-align: left;
+    }
+    fieldset {
+      border: none;
+      border-left: 4px solid #fdd835;
+      padding: 20px 20px 10px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    legend {
+      font-weight: bold;
+      font-size: 18px;
+      color: #222;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      color: #444;
+    }
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      transition: border 0.3s ease;
+    }
+    input:focus,
+    select:focus {
+      border-color: #fdd835;
+      outline: none;
+    }
+    .termo {
+      font-size: 14px;
+      background: #fff8dc;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #e1c870;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+    button {
+      background-color: #fdd835;
+      border: none;
+      padding: 14px 24px;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto;
+      transition: background-color 0.3s ease;
+    }
+    button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #fbc02d;
+    }
+    @media (max-width: 480px) {
+      form {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -221,9 +221,12 @@
   </form>
 
   <script>
+    // Libera o botão apenas se aceitar os termos
     document.getElementById('acceptTerms').addEventListener('change', function() {
       document.getElementById('submitBtn').disabled = this.value !== 'Sim';
     });
+
+    // Preenche cidade pelo CEP
     async function buscaCidade(cepInput, cityField) {
       const cep = cepInput.replace(/\D/g, '');
       if (cep.length !== 8) return;
@@ -237,6 +240,11 @@
     }
     document.getElementById('cep1').addEventListener('blur', e => buscaCidade(e.target.value, 'city1'));
     document.getElementById('cep2').addEventListener('blur', e => buscaCidade(e.target.value, 'city2'));
+
+    // Evita clique duplo no envio
+    document.getElementById('inscricaoForm').addEventListener('submit', function () {
+      document.getElementById('submitBtn').disabled = true;
+    });
   </script>
 
   <!-- Botão flutuante do WhatsApp -->
