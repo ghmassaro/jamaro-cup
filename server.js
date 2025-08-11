@@ -1,18 +1,19 @@
 // server.js
 const express = require('express');
-const path    = require('path');
-const multer  = require('multer');
+const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
 
 // lowdb v4+ imports
-const { Low }      = require('lowdb');
+const { Low } = require('lowdb');
 const { JSONFile } = require('lowdb/node');
 
 const app = express();
 
 // LowDB setup with default data
-const file    = path.join(__dirname, 'db.json');
+const file = path.join(__dirname, 'db.json');
 const adapter = new JSONFile(file);
-const db      = new Low(adapter, { entries: [] });
+const db = new Low(adapter, { entries: [] });
 
 (async () => {
   await db.read();
@@ -33,6 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Endpoint para receber o formulário de inscrição
 app.post('/submit', upload.single('paymentProof'), async (req, res) => {
+  // Nome original com extensão preservada
+  let savedFileName = null;
+  if (req.file) {
+    const originalExt = path.extname(req.file.originalname); // ex: .jpg, .png, .pdf
+    savedFileName = req.file.filename + originalExt;
+    fs.renameSync(req.file.path, path.join(__dirname, 'uploads', savedFileName));
+  }
+
   const entry = {
     submittedAt: new Date().toISOString(),
     athlete1: {
@@ -57,14 +66,14 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
       instagram: req.body['entry.622151674'],
     },
     consent: req.body['acceptTerms'],
-    paymentProof: req.file ? req.file.filename : null
+    uniforms: `${req.body['entry.kit1']} / ${req.body['entry.kit2']}`, // <-- uniforme combinado
+    paymentProof: savedFileName
   };
 
   await db.read();
   db.data.entries.push(entry);
   await db.write();
 
-  // Redireciona para página de agradecimento
   res.redirect('/obrigado.html');
 });
 
@@ -74,6 +83,5 @@ app.get('/admin', async (req, res) => {
   res.render('admin', { entries: db.data.entries });
 });
 
-// Inicia o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server rodando em http://localhost:${PORT}`));
