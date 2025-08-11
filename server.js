@@ -65,7 +65,7 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
   await db.write();
 
   // Redireciona para página de agradecimento
-  res.redirect('/thankyou.html');
+  res.redirect('/obrigado.html');
 });
 
 // Dashboard de administração
