@@ -91,6 +91,80 @@
       },
       "consent": "Sim",
       "paymentProof": "c76db1b09d449b63c8eb91583b65f173"
+    },
+    {
+      "id": "6967adc2-d6e4-4538-a370-224170b3a6d3",
+      "submittedAt": "2025-08-11T18:58:07.212Z",
+      "athlete1": {
+        "name": "gustavo massaro",
+        "phone": "17997662730",
+        "email": "gustavohmassaro@gmail.com",
+        "cep": "15775000",
+        "city": "Santa Fé do Sul",
+        "kit": "G"
+      },
+      "athlete2": {
+        "name": "dener",
+        "phone": "17997662730",
+        "email": "ghmassaro@gmail.com",
+        "cep": "15775000",
+        "city": "Santa Fé do Sul",
+        "kit": "M"
+      },
+      "duo": {
+        "name": "dsds",
+        "category": "Intermediário",
+        "instagram": "dsdsd"
+      },
+      "consent": "Sim",
+      "uniforms": "G / M",
+      "paymentProof": "5fb4f324feb66e4fc1ffc56a29def544.png",
+      "paymentProofUrl": "/uploads/5fb4f324feb66e4fc1ffc56a29def544.png",
+      "fileHash": "12562b34f93282481486e08844ad2feddd030db9f250309eca9441951a7f6780",
+      "status": "pending_review",
+      "validation": {
+        "ok": false,
+        "score": 0,
+        "mime": "image/png",
+        "textSample": ""
+      }
+    },
+    {
+      "id": "cc15fd2e-a66f-421e-ba95-0d1a78383e5a",
+      "submittedAt": "2025-08-11T18:58:25.101Z",
+      "athlete1": {
+        "name": "gustavo massaro",
+        "phone": "17997662730",
+        "email": "gustavohmassaro@gmail.com",
+        "cep": "15775000",
+        "city": "",
+        "kit": "G"
+      },
+      "athlete2": {
+        "name": "dener",
+        "phone": "17997662730",
+        "email": "ghmassaro@gmail.com",
+        "cep": "15775000",
+        "city": "",
+        "kit": "M"
+      },
+      "duo": {
+        "name": "dsds",
+        "category": "Intermediário",
+        "instagram": "dsdsd"
+      },
+      "consent": "Sim",
+      "uniforms": "G / M",
+      "paymentProof": "b66e84e3df78e84b9f7b4424cb7f87b7.png",
+      "paymentProofUrl": "/uploads/b66e84e3df78e84b9f7b4424cb7f87b7.png",
+      "fileHash": "7fcca04dfad656d7601a92cabee64dfd241f4df1777f0ebb4af55adeeb4f1648",
+      "status": "accepted",
+      "validation": {
+        "ok": true,
+        "score": 0,
+        "mime": "image/png",
+        "textSample": ""
+      }
     }
   ]
 }

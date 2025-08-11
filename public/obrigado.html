@@ -6,16 +6,50 @@
   <title>Obrigado!</title>
   
   <style>
-    body { font-family: Arial, sans-serif; background: #f2f2f2; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .msg { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
-    .msg h1 { margin-bottom: 20px; color: #333; }
-    .msg a { display: inline-block; margin-top: 20px; color: #fdd835; text-decoration: none; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .msg {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+    }
+    .msg h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .msg p {
+      margin-bottom: 10px;
+      color: #555;
+      line-height: 1.4em;
+    }
+    .msg strong {
+      color: #f57c00;
+    }
+    .msg a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #fdd835;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="msg">
     <h1>Inscrição recebida!</h1>
-    <p>Obrigado por se inscrever na 4ª Jamaro Cup. Em breve entraremos em contato.</p>
+    <p>Obrigado por se inscrever na <strong>4ª Jamaro Cup</strong>.</p>
+    <p>Seu comprovante foi recebido e está <strong>em revisão</strong>.</p>
+    <p>Você receberá um e-mail quando sua inscrição for validada e confirmada.</p>
     <a href="/">Voltar ao formulário</a>
   </div>
 </body>
