@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jamaro Cup - Categorias</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+
+    header {
+      background-color: #000;
+      padding: 20px;
+    }
+
+    header img {
+      height: 100px;
+    }
+
+    h1 {
+      margin: 30px 0;
+      color: #333;
+    }
+
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 250px;
+      padding: 20px;
+      transition: transform 0.2s;
+      text-align: left;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      font-size: 20px;
+      color: #000;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #fdd835;
+      color: #000;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .card a:hover {
+      background-color: #fbc02d;
+    }
+
+    .card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* Estilo do botão flutuante do WhatsApp */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25D366;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      transition: transform 0.3s ease;
+    }
+
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+    }
+
+    .whatsapp-float img {
+      width: 32px;
+      height: 32px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header-topo">
+  <div class="header-container">
+    <img src="/img/5.png" alt="Logo Jamaro Cup" class="logo-img">
+    
+  </div>
+</header>
+
+  <h1>Escolha sua Categoria para Inscrição</h1>
+
+  <div class="cards-container">
+    <div class="card">
+      <img src="/img/aprendiz.jpg" alt="Aprendiz">
+      <h2>Aprendiz</h2>
+      <p>Categoria ideal para quem está começando no futevôlei.</p>
+      <a href="/formulario.html?categoria=Aprendiz">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/InicianteB.jpg" alt="Iniciante B">
+      <h2>Iniciante B</h2>
+      <p>Para jogadores com pouca experiência, buscando evolução.</p>
+      <a href="/formulario.html?categoria=Iniciante%20B">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/iniciante.jpg" alt="Iniciante A">
+      <h2>Iniciante A</h2>
+      <p>Categoria para jogadores em transição para o nível intermediário.</p>
+      <a href="/formulario.html?categoria=Iniciante%20A">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/intermediario.jpg" alt="Intermediário">
+      <h2>Intermediário</h2>
+      <p>Jogadores com boa técnica e rodagem em torneios.</p>
+      <a href="/formulario.html?categoria=Intermediário">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/intermediario.jpg" alt="Amador">
+      <h2>Amador</h2>
+      <p>Categoria avançada para jogadores com bom desempenho em campeonatos.</p>
+      <a href="/formulario.html?categoria=Amador">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/intermediario.jpg" alt="Misto Principiante">
+      <h2>Misto Principiante</h2>
+      <p>Duplas mistas com jogadores(as) iniciantes.</p>
+      <a href="/formulario.html?categoria=Misto%20Principiante">Inscrever-se</a>
+    </div>
+    <div class="card">
+      <img src="/img/Mistoiniciante.jpg" alt="Misto Iniciante">
+      <h2>Misto Iniciante</h2>
+      <p>Categoria mista com atletas em nível mais avançado.</p>
+      <a href="/formulario.html?categoria=Misto%20Iniciante">Inscrever-se</a>
+    </div>
+  </div>
+
+  <!-- Botão flutuante WhatsApp -->
+  <a class="whatsapp-float" href="https://wa.me/5517997237635" target="_blank" title="Fale com a organização">
+    <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+  </a>
+</body>
+</html>

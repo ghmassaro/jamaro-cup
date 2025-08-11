@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Jamaro Cup</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 20px; }
+    header { text-align: center; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    thead { background: #000; color: #fff; }
+    tbody tr:nth-child(even) { background: #f9f9f9; }
+    select.filter-select, input.filter-input {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+    #downloadExcel {
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      font-weight: bold;
+      background-color: #000;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/thumb.png" alt="Logo Jamaro" height="80" />
+    <h1>Dashboard de Inscrições - 4ª Jamaro Cup</h1>
+  </header>
+
+  <button id="downloadExcel">📥 Baixar Excel</button>
+
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Data<br><input class="filter-input" data-col="0" onkeyup="filtrarInput(this)" /></th>
+        <th>Dupla<br><input class="filter-input" data-col="1" onkeyup="filtrarInput(this)" /></th>
+        <th>Categoria<br><select class="filter-select" data-col="2" onchange="filtrarSelect(this)"><option value="">Todas</option></select></th>
+        <th>Atleta 1<br><input class="filter-input" data-col="3" onkeyup="filtrarInput(this)" /></th>
+        <th>Atleta 2<br><input class="filter-input" data-col="4" onkeyup="filtrarInput(this)" /></th>
+        <th>Cidade 1<br><select class="filter-select" data-col="5" onchange="filtrarSelect(this)"><option value="">Todas</option></select></th>
+        <th>Cidade 2<br><select class="filter-select" data-col="6" onchange="filtrarSelect(this)"><option value="">Todas</option></select></th>
+        <th>Uniformes<br><select class="filter-select" data-col="7" onchange="filtrarSelect(this)"><option value="">Todos</option></select></th>
+        <th>Comprovante</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% entries.forEach(e => { %>
+      <tr>
+        <td><%= new Date(e.submittedAt).toLocaleString('pt-BR') %></td>
+        <td><%= e.duo.name %></td>
+        <td><%= e.duo.category %></td>
+        <td><%= e.athlete1.name %></td>
+        <td><%= e.athlete2.name %></td>
+        <td><%= e.athlete1.city || '-' %></td>
+        <td><%= e.athlete2.city || '-' %></td>
+        <td><%= e.uniforms || '—' %></td>
+        <td>
+          <% if (e.paymentProof) { %>
+            <a href="/uploads/<%= e.paymentProof %>" target="_blank">Ver</a>
+          <% } else { %>
+            —
+          <% } %>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <script>
+    // Filtro por input
+    function filtrarInput(input) {
+      const colIndex = parseInt(input.getAttribute('data-col'));
+      const valor = input.value.toLowerCase();
+      const rows = document.querySelectorAll("#tabela tbody tr");
+
+      rows.forEach(row => {
+        const cell = row.cells[colIndex];
+        const texto = cell.textContent || cell.innerText;
+        row.style.display = texto.toLowerCase().includes(valor) ? "" : "none";
+      });
+    }
+
+    // Filtro por select
+    function filtrarSelect(select) {
+      const colIndex = parseInt(select.getAttribute('data-col'));
+      const valor = select.value;
+      const rows = document.querySelectorAll("#tabela tbody tr");
+
+      rows.forEach(row => {
+        const cell = row.cells[colIndex];
+        const texto = cell.textContent || cell.innerText;
+        row.style.display = (!valor || texto === valor) ? "" : "none";
+      });
+    }
+
+    // Preencher os dropdowns corretamente
+    function preencherDropdowns() {
+      const table = document.getElementById("tabela");
+      const selects = document.querySelectorAll("select.filter-select");
+
+      selects.forEach(select => {
+        const colIndex = parseInt(select.getAttribute('data-col'));
+        const values = new Set();
+
+        Array.from(table.tBodies[0].rows).forEach(row => {
+          const cellValue = row.cells[colIndex].innerText.trim();
+          if (cellValue && cellValue !== '—') {
+            values.add(cellValue);
+          }
+        });
+
+        Array.from(values).sort().forEach(value => {
+          const option = document.createElement("option");
+          option.value = option.textContent = value;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    preencherDropdowns();
+
+    // Exporta para Excel
+    document.getElementById('downloadExcel').addEventListener('click', () => {
+      const table = document.getElementById("tabela");
+      const html = table.outerHTML.replace(/ /g, '%20');
+      const a = document.createElement('a');
+      a.href = 'data:application/vnd.ms-excel,' + html;
+      a.download = 'relatorio-jamaro-cup.xls';
+      a.click();
+    });
+  </script>
+</body>
+</html>

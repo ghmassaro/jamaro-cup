@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jamaro FTV - Inscrição</title>
+  <style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  header {
+    background-color: #000;
+    padding: 20px;
+  }
+
+  header img {
+    height: 100px;
+  }
+
+  h1 {
+    color: #333;
+    margin-top: 20px;
+    font-size: 24px;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    display: inline-block;
+    margin: 20px 0;
+  }
+
+  form {
+    max-width: 95%;
+    width: 100%;
+    max-width: 700px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: left;
+  }
+
+  fieldset {
+    border: none;
+    border-left: 4px solid #fdd835;
+    padding: 20px 20px 10px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  legend {
+    font-weight: bold;
+    font-size: 18px;
+    color: #222;
+    margin-bottom: 10px;
+  }
+
+  label {
+    display: block;
+    margin: 12px 0 6px;
+    font-weight: 600;
+    color: #444;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border 0.3s ease;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #fdd835;
+    outline: none;
+  }
+
+  .termo {
+    font-size: 14px;
+    background: #fff8dc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 1px solid #e1c870;
+    max-height: 200px;
+    overflow-y: auto;
+    line-height: 1.5;
+  }
+
+  button {
+    background-color: #fdd835;
+    border: none;
+    padding: 14px 24px;
+    color: #000;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    display: block;
+    margin: 0 auto;
+    transition: background-color 0.3s ease;
+  }
+
+  button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+  }
+
+  button:hover:not(:disabled) {
+    background-color: #fbc02d;
+  }
+
+  @media (max-width: 480px) {
+    form {
+      padding: 20px;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <header>
+    <img src="/thumb.png" alt="Logo Jamaro" />
+  </header>
+  <h1>Formulário de Inscrição - Jamaro Cup</h1>
+  <nav>
+    <a href="/admin">Painel de Admin</a>
+  </nav>
+  <form id="inscricaoForm" action="/submit" method="POST" enctype="multipart/form-data">
+    <!-- Atleta 1 -->
+    <fieldset>
+      <legend>Atleta 1</legend>
+      <label for="nome1">Nome Completo</label>
+      <input type="text" id="nome1" name="entry.857165334" required />
+      <label for="tel1">Telefone</label>
+      <input type="tel" id="tel1" name="entry.222222222" required />
+      <label for="email1">E-mail</label>
+      <input type="email" id="email1" name="entry.444444444" required />
+      <label for="cep1">CEP</label>
+      <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required />
+      <label for="city1">Cidade</label>
+      <input type="text" id="city1" name="entry.173494761" readonly required />
+      <label for="kit1">Kit (Tamanho)</label>
+      <select id="kit1" name="entry.777777777" required>
+        <option value="">Selecione...</option>
+        <option value="M">M</option>
+        <option value="G">G</option>
+        <option value="GG">GG</option>
+      </select>
+    </fieldset>
+    <!-- Atleta 2 -->
+    <fieldset>
+      <legend>Atleta 2</legend>
+      <label for="nome2">Nome Completo</label>
+      <input type="text" id="nome2" name="entry.949098972" required />
+      <label for="tel2">Telefone</label>
+      <input type="tel" id="tel2" name="entry.333333333" required />
+      <label for="email2">E-mail</label>
+      <input type="email" id="email2" name="entry.555555555" required />
+      <label for="cep2">CEP</label>
+      <input type="text" id="cep2" name="entry.cep2" placeholder="00000-000" maxlength="9" required />
+      <label for="city2">Cidade</label>
+      <input type="text" id="city2" name="entry.173494761_2" readonly required />
+      <label for="kit2">Kit (Tamanho)</label>
+      <select id="kit2" name="entry.777777778" required>
+        <option value="">Selecione...</option>
+        <option value="M">M</option>
+        <option value="G">G</option>
+        <option value="GG">GG</option>
+      </select>
+    </fieldset>
+    <!-- Dados da Dupla -->
+    <fieldset>
+      <legend>Dados da Dupla</legend>
+      <label for="duoName">Nome da Dupla</label>
+      <input type="text" id="duoName" name="entry.111111111" required />
+      <label for="category">Categoria</label>
+      <select id="category" name="entry.666666666" required>
+        <option value="">Selecione...</option>
+        <option value="Aprendiz">Aprendiz</option>
+        <option value="Iniciante B">Iniciante B</option>
+        <option value="Iniciante A">Iniciante A</option>
+        <option value="Intermediario">Intermediário</option>
+        <option value="Amador">Amador</option>
+        <option value="Misto Principiante">Misto Principiante</option>
+        <option value="Misto Iniciante">Misto Iniciante</option>
+      </select>
+      <label for="instagram">Instagram da Dupla</label>
+      <input type="text" id="instagram" name="entry.622151674" />
+    </fieldset>
+    <!-- Termo de Consentimento -->
+    <fieldset>
+      <legend>Termo de Consentimento</legend>
+      <div class="termo">
+        <strong>Termo de Consentimento - 4ª Jamaro Cup</strong><br><br>
+        Inscrição implica aceitação completa deste termo.
+        <ol>
+          <li>Reembolso em até 7 dias.</li>
+          <li>Desclassificação sem reembolso.</li>
+          <li>Uniforme final, sem trocas exceto por defeito.</li>
+          <li>Uso de imagem para divulgação.</li>
+        </ol>
+      </div>
+      <label for="acceptTerms">Você aceita o termo?</label>
+      <select id="acceptTerms" name="acceptTerms" required>
+        <option value="">Selecione...</option>
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+      </select>
+    </fieldset>
+    <!-- Comprovante -->
+    <fieldset>
+      <legend>Comprovante de Pagamento</legend>
+      <label for="paymentProof">Envie comprovante (PIX/Boleto)</label>
+      <input type="file" id="paymentProof" name="paymentProof" accept="image/*,.pdf" required />
+    </fieldset>
+    <button type="submit" id="submitBtn" disabled>Enviar Inscrição</button>
+  </form>
+  <script>
+    document.getElementById('acceptTerms').addEventListener('change', function() {
+      document.getElementById('submitBtn').disabled = this.value !== 'Sim';
+    });
+    async function buscaCidade(cepInput, cityField) {
+      const cep = cepInput.replace(/\D/g, ''); if (cep.length !== 8) return;
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro) document.getElementById(cityField).value = data.localidade;
+      } catch (e) { console.error(e); }
+    }
+    document.getElementById('cep1').addEventListener('blur', e => buscaCidade(e.target.value, 'city1'));
+    document.getElementById('cep2').addEventListener('blur', e => buscaCidade(e.target.value, 'city2'));
+  </script>
+  <!-- Botão flutuante do WhatsApp -->
+<a class="whatsapp-float" href="https://wa.me/5517997237635" target="_blank" title="Fale com a organização">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<style>
+  .whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #25D366;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    transition: transform 0.3s ease;
+  }
+
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+  }
+
+  .whatsapp-float img {
+    width: 32px;
+    height: 32px;
+  }
+</style>
+
+</body>
+</html>
