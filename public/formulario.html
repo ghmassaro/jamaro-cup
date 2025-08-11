@@ -37,14 +37,32 @@
     }
     input:focus, select:focus { border-color: #fdd835; outline: none; box-shadow: 0 0 0 3px rgba(253,216,53,.25); }
 
-    /* Box amarelo reutilizável (termo e info de categoria) */
-    .termo, .categoria-info {
-      font-size: 14px; background: #fff8dc; padding: 15px; margin-bottom: 15px;
-      border-radius: 10px; border: 1px solid #e1c870; line-height: 1.5;
-    }
-    .termo { max-height: 240px; overflow-y: auto; }
-    .categoria-info { display: none; } /* aparece via JS */
-    .categoria-info strong { display:block; margin-bottom:6px; }
+   /* Box amarelo reutilizável (termo e info de categoria) */
+.termo, .categoria-info {
+  font-size: 14px;
+  background: #fff8dc;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #e1c870;
+  line-height: 1.5;
+}
+
+.termo {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.categoria-info {
+  display: none; /* aparece via JS */
+  margin-top: 10px; /* <<< Espaço extra entre select e box */
+}
+
+.categoria-info strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
 
     /* Checkbox de termos */
     .accept-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
@@ -142,6 +160,7 @@
         <option value="Misto Principiante">Misto Principiante</option>
         <option value="Misto Iniciante">Misto Iniciante</option>
       </select>
+      
 
       <!-- Box informativo da categoria selecionada -->
       <div id="categoriaInfo" class="categoria-info">
