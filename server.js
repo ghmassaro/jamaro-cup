@@ -37,7 +37,6 @@ const upload = multer({
   dest: uploadsDir,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    // aceita pdf e imagens comuns; sem validação de conteúdo
     const ok = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype);
     cb(ok ? null : new Error('Tipo de arquivo não permitido'), ok);
   }
@@ -56,6 +55,17 @@ function sha256File(filePath) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+function normalizeKit(str) {
+  if (!str) return '';
+  let s = String(str).trim().replace(/\s+/g, ' ');
+  if (!/^kit\b/i.test(s)) s = 'Kit ' + s;
+  s = s.replace(/\b(pp|p|m|g{1,3}|xg|xxg)\b/gi, m => m.toUpperCase());
+  s = s.replace(/\b(masculino|feminino|unissex|adulto|infantil)\b/gi,
+    w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  s = s.replace(/^kit\b/i, 'Kit');
+  return s;
+}
+
 // === E-mail (Nodemailer) ===
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -67,11 +77,8 @@ const transporter = nodemailer.createTransport({
   } : undefined
 });
 
-// Enviar e-mail de status
 async function sendStatusEmail(entry, status) {
-  const recipients = [entry.athlete1?.email, entry.athlete2?.email]
-    .filter(Boolean)
-    .join(', ');
+  const recipients = [entry.athlete1?.email, entry.athlete2?.email].filter(Boolean).join(', ');
   if (!recipients) return;
 
   const isApproved = status === 'accepted';
@@ -119,38 +126,35 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).send('Nenhum arquivo enviado.');
 
-    // Renomeia preservando extensão original
-    const originalExt = path.extname(req.file.originalname); // .jpg/.png/.pdf
+    const originalExt = path.extname(req.file.originalname);
     const finalName = req.file.filename + originalExt.toLowerCase();
     const finalPath = path.join(uploadsDir, finalName);
     fs.renameSync(req.file.path, finalPath);
 
-    // Hash para deduplicação
     const fileHash = sha256File(finalPath);
 
-    // Monta o registro (sem validação automática)
     const entry = {
       id: crypto.randomUUID(),
       submittedAt: new Date().toISOString(),
       athlete1: {
-        name: req.body['entry.857165334'],
+        name:  req.body['entry.857165334'],
         phone: req.body['entry.222222222'],
         email: req.body['entry.444444444'],
-        cep: req.body['entry.cep1'],
-        city: req.body['city1'],
-        kit: req.body['entry.kit1'],
+        cep:   req.body['entry.cep1'],
+        city:  req.body['city1'],
+        kit:   req.body['entry.kit1'],
       },
       athlete2: {
-        name: req.body['entry.949098972'],
+        name:  req.body['entry.949098972'],
         phone: req.body['entry.333333333'],
         email: req.body['entry.555555555'],
-        cep: req.body['entry.cep2'],
-        city: req.body['city2'],
-        kit: req.body['entry.kit2'],
+        cep:   req.body['entry.cep2'],
+        city:  req.body['city2'],
+        kit:   req.body['entry.kit2'],
       },
       duo: {
-        name: req.body['entry.111111111'],
-        category: req.body['entry.666666666'],
+        name:      req.body['entry.111111111'],
+        category:  req.body['entry.666666666'],
         instagram: req.body['entry.622151674'],
       },
       consent: req.body['acceptTerms'],
@@ -158,32 +162,70 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
       paymentProof: finalName,
       paymentProofUrl: `/uploads/${finalName}`,
       fileHash,
-      status: 'pending_review',   // sempre começa em revisão
-      validation: {}              // sem score/ocr
+      status: 'pending_review',
+      validation: {}
     };
 
-    // Persistência + regra de duplicado
     await db.read();
     const dup = db.data.entries.find(e => e.fileHash === fileHash);
-    if (dup) {
-      return res.status(409).send('Comprovante já enviado anteriormente (duplicado).');
-    }
+    if (dup) return res.status(409).send('Comprovante já enviado anteriormente (duplicado).');
+
     db.data.entries.push(entry);
     await db.write();
 
-    // Vai para a tela de obrigado (que já informa "em revisão")
     return res.redirect('/obrigado.html');
-
   } catch (err) {
     console.error(err);
     return res.status(500).send('Erro ao processar a inscrição.');
   }
 });
 
-// === Admin: lista + ações ===
+// === Admin: lista + filtros + totais de uniformes ===
 app.get('/admin', async (req, res) => {
   await db.read();
-  res.render('admin', { entries: db.data.entries });
+  const all = Array.isArray(db.data?.entries) ? db.data.entries : [];
+
+  // filtros vindos da querystring
+  const category = (req.query.category || '').trim();
+  const status   = (req.query.status   || '').trim();
+
+  // listas para os <select>
+  const categories = [...new Set(all.map(e => e?.duo?.category).filter(Boolean))].sort();
+  const statuses   = ['pending_review', 'accepted', 'rejected', 'duplicate'];
+
+  // aplica filtros
+  const entries = all.filter(e => {
+    const okCategory = !category || e?.duo?.category === category;
+    const okStatus   = !status   || e?.status === status;
+    return okCategory && okStatus;
+  });
+
+  // totais de uniformes (usa athlete1.kit / athlete2.kit e também a string e.uniforms "X / Y" se existir)
+  const uniformTotals = {};
+  const addKit = (raw) => {
+    const key = normalizeKit(raw);
+    if (!key) return;
+    uniformTotals[key] = (uniformTotals[key] || 0) + 1;
+  };
+
+  for (const e of entries) {
+    if (e?.athlete1?.kit) addKit(e.athlete1.kit);
+    if (e?.athlete2?.kit) addKit(e.athlete2.kit);
+
+    if (typeof e?.uniforms === 'string' && e.uniforms.includes('/')) {
+      const [k1, k2] = e.uniforms.split('/').map(s => s && s.trim()).filter(Boolean);
+      if (k1) addKit(k1);
+      if (k2) addKit(k2);
+    }
+  }
+
+  res.render('admin', {
+    entries,
+    categories,
+    statuses,
+    selected: { category, status }, // usado pelo template
+    uniformTotals
+  });
 });
 
 // Aprovar (envia e-mail)
