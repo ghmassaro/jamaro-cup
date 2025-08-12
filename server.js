@@ -66,6 +66,24 @@ function normalizeKit(str) {
   return s;
 }
 
+// Score simples (heurística leve — ajuste se quiser)
+function computeScore(entry, fileExtLower) {
+  // Base 50, soma pontos por dados essenciais presentes, limita 100
+  let score = 50;
+  const goodExt = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'].includes(fileExtLower);
+  if (goodExt) score += 10;
+  if (entry.athlete1?.email && entry.athlete2?.email) score += 10;
+  if (entry.athlete1?.kit && entry.athlete2?.kit) score += 10;
+  if (entry.duo?.name) score += 10;
+  if (entry.duo?.category) score += 10;
+  if (entry.duo?.instagram) score += 5;
+  if (!entry.consent) score -= 20; // sem termo: penaliza
+
+  // clamp
+  score = Math.max(0, Math.min(100, score));
+  return score;
+}
+
 // === E-mail (Nodemailer) ===
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -163,12 +181,20 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
       paymentProofUrl: `/uploads/${finalName}`,
       fileHash,
       status: 'pending_review',
-      validation: {}
+      validation: {} // preenchido abaixo com score
     };
 
+    // Duplicado?
     await db.read();
     const dup = db.data.entries.find(e => e.fileHash === fileHash);
-    if (dup) return res.status(409).send('Comprovante já enviado anteriormente (duplicado).');
+    if (dup) {
+      // se quiser já marcar como duplicado:
+      // entry.status = 'duplicate';
+      return res.status(409).send('Comprovante já enviado anteriormente (duplicado).');
+    }
+
+    // Score simples
+    entry.validation.score = computeScore(entry, originalExt.toLowerCase());
 
     db.data.entries.push(entry);
     await db.write();
@@ -200,18 +226,16 @@ app.get('/admin', async (req, res) => {
     return okCategory && okStatus;
   });
 
-  // totais de uniformes (usa athlete1.kit / athlete2.kit e também a string e.uniforms "X / Y" se existir)
+  // totais de uniformes
   const uniformTotals = {};
   const addKit = (raw) => {
     const key = normalizeKit(raw);
     if (!key) return;
     uniformTotals[key] = (uniformTotals[key] || 0) + 1;
   };
-
   for (const e of entries) {
     if (e?.athlete1?.kit) addKit(e.athlete1.kit);
     if (e?.athlete2?.kit) addKit(e.athlete2.kit);
-
     if (typeof e?.uniforms === 'string' && e.uniforms.includes('/')) {
       const [k1, k2] = e.uniforms.split('/').map(s => s && s.trim()).filter(Boolean);
       if (k1) addKit(k1);
@@ -223,9 +247,117 @@ app.get('/admin', async (req, res) => {
     entries,
     categories,
     statuses,
-    selected: { category, status }, // usado pelo template
+    selected: { category, status },
     uniformTotals
   });
+});
+
+// === Exportar Excel respeitando filtros (/admin/export.xlsx) ===
+app.get('/admin/export.xlsx', async (req, res) => {
+  const ExcelJS = require('exceljs');
+
+  await db.read();
+  const all = Array.isArray(db.data?.entries) ? db.data.entries : [];
+
+  const category = (req.query.category || '').trim();
+  const status   = (req.query.status   || '').trim();
+
+  const entries = all.filter(e => {
+    const okCategory = !category || e?.duo?.category === category;
+    const okStatus   = !status   || e?.status === status;
+    return okCategory && okStatus;
+  });
+
+  // totais de uniformes
+  const uniformTotals = {};
+  const addKit = (raw) => {
+    const key = normalizeKit(raw);
+    if (!key) return;
+    uniformTotals[key] = (uniformTotals[key] || 0) + 1;
+  };
+  for (const e of entries) {
+    if (e?.athlete1?.kit) addKit(e.athlete1.kit);
+    if (e?.athlete2?.kit) addKit(e.athlete2.kit);
+    if (typeof e?.uniforms === 'string' && e.uniforms.includes('/')) {
+      const [k1, k2] = e.uniforms.split('/').map(s => s && s.trim()).filter(Boolean);
+      if (k1) addKit(k1);
+      if (k2) addKit(k2);
+    }
+  }
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Inscrições');
+
+  ws.columns = [
+    { header: 'Data', key: 'submittedAt', width: 20 },
+    { header: 'Dupla', key: 'duoName', width: 25 },
+    { header: 'Categoria', key: 'category', width: 18 },
+
+    { header: 'A1 Nome', key: 'a1Name', width: 20 },
+    { header: 'A1 Email', key: 'a1Email', width: 28 },
+    { header: 'A1 Fone', key: 'a1Phone', width: 16 },
+    { header: 'A1 CEP', key: 'a1Cep', width: 12 },
+    { header: 'A1 Cidade', key: 'a1City', width: 18 },
+    { header: 'A1 Kit', key: 'a1Kit', width: 18 },
+
+    { header: 'A2 Nome', key: 'a2Name', width: 20 },
+    { header: 'A2 Email', key: 'a2Email', width: 28 },
+    { header: 'A2 Fone', key: 'a2Phone', width: 16 },
+    { header: 'A2 CEP', key: 'a2Cep', width: 12 },
+    { header: 'A2 Cidade', key: 'a2City', width: 18 },
+    { header: 'A2 Kit', key: 'a2Kit', width: 18 },
+
+    { header: 'Status', key: 'status', width: 16 },
+    { header: 'Score', key: 'score', width: 8 },
+    { header: 'Comprovante URL', key: 'proofUrl', width: 40 },
+    { header: 'Instagram', key: 'instagram', width: 22 },
+  ];
+
+  for (const e of entries) {
+    ws.addRow({
+      submittedAt: e.submittedAt ? new Date(e.submittedAt).toLocaleString('pt-BR') : '',
+      duoName: e.duo?.name || '',
+      category: e.duo?.category || '',
+
+      a1Name: e.athlete1?.name || '',
+      a1Email: e.athlete1?.email || '',
+      a1Phone: e.athlete1?.phone || '',
+      a1Cep: e.athlete1?.cep || '',
+      a1City: e.athlete1?.city || '',
+      a1Kit: e.athlete1?.kit || '',
+
+      a2Name: e.athlete2?.name || '',
+      a2Email: e.athlete2?.email || '',
+      a2Phone: e.athlete2?.phone || '',
+      a2Cep: e.athlete2?.cep || '',
+      a2City: e.athlete2?.city || '',
+      a2Kit: e.athlete2?.kit || '',
+
+      status: e.status || '',
+      score: (e.validation && e.validation.score != null) ? e.validation.score : '',
+      proofUrl: e.paymentProofUrl || '',
+      instagram: e.duo?.instagram || '',
+    });
+  }
+
+  const ws2 = wb.addWorksheet('Uniformes Totais');
+  ws2.columns = [
+    { header: 'Modelo / Tamanho / Gênero', key: 'key', width: 35 },
+    { header: 'Quantidade', key: 'qty', width: 12 },
+  ];
+  Object.keys(uniformTotals).sort().forEach(k => {
+    ws2.addRow({ key: k, qty: uniformTotals[k] });
+  });
+
+  const ts = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const fname = `inscricoes_jamaro_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.xlsx`;
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${fname}"`);
+
+  await wb.xlsx.write(res);
+  res.end();
 });
 
 // Aprovar (envia e-mail)
