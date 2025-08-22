@@ -5,124 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jamaro FTV - Inscrição</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-      text-align: center;
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 0; text-align: center; }
+    header { background-color: #000; padding: 20px; }
+    header img { height: 100px; }
+    h1 { color: #333; margin-top: 20px; font-size: 24px; }
+
+    /* Banner de categoria e valor */
+    .info-banner {
+      max-width: 900px; margin: 10px auto 0;
+      background: #fffbe6; color: #5c4a00; border: 1px solid #ffe58f;
+      border-radius: 10px; padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      text-align: left; font-size: 14px;
     }
-    header {
-      background-color: #000;
-      padding: 20px;
-    }
-    header img {
-      height: 100px;
-    }
-    h1 {
-      color: #333;
-      margin-top: 20px;
-      font-size: 24px;
-    }
-    nav a {
-      text-decoration: none;
-      color: #000;
-      font-weight: bold;
-      display: inline-block;
-      margin: 20px 0;
-    }
+    .info-banner strong { font-weight: 700; }
+    .info-banner .dot { margin: 0 8px; opacity: .5; }
+
     form {
-      max-width: 95%;
-      width: 100%;
-      max-width: 700px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      width: 100%; max-width: 700px; margin: 16px auto 30px; background: #fff;
+      padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       text-align: left;
     }
     fieldset {
-      border: none;
-      border-left: 4px solid #fdd835;
-      padding: 20px 20px 10px;
-      margin-bottom: 30px;
-      border-radius: 8px;
-      background: #fafafa;
+      border: none; border-left: 4px solid #fdd835; padding: 20px 20px 10px;
+      margin-bottom: 30px; border-radius: 8px; background: #fafafa;
     }
-    legend {
-      font-weight: bold;
-      font-size: 18px;
-      color: #222;
-      margin-bottom: 10px;
+    legend { font-weight: bold; font-size: 18px; color: #222; margin-bottom: 10px; }
+    label { display: block; margin: 12px 0 6px; font-weight: 600; color: #444; }
+    input, select {
+      width: 100%; padding: 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 6px;
+      box-sizing: border-box; transition: border .3s ease, box-shadow .2s ease;
     }
-    label {
-      display: block;
-      margin: 12px 0 6px;
-      font-weight: 600;
-      color: #444;
-    }
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      transition: border 0.3s ease;
-    }
-    input:focus,
-    select:focus {
-      border-color: #fdd835;
-      outline: none;
-    }
-    .termo {
-      font-size: 14px;
-      background: #fff8dc;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      border: 1px solid #e1c870;
-      max-height: 200px;
-      overflow-y: auto;
-      line-height: 1.5;
-    }
+    input:focus, select:focus { border-color: #fdd835; outline: none; box-shadow: 0 0 0 3px rgba(253,216,53,.25); }
+
+   /* Box amarelo reutilizável (termo e info de categoria) */
+.termo, .categoria-info {
+  font-size: 14px;
+  background: #fff8dc;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #e1c870;
+  line-height: 1.5;
+}
+
+.termo {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.categoria-info {
+  display: none; /* aparece via JS */
+  margin-top: 10px; /* <<< Espaço extra entre select e box */
+}
+
+.categoria-info strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+
+    /* Checkbox de termos */
+    .accept-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
+    .accept-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; cursor: pointer; }
+    .accept-row label { margin: 0; font-weight: 500; color: #333; cursor: pointer; }
+    .hint { font-size: 13px; color: #666; margin-top: 6px; }
+
     button {
-      background-color: #fdd835;
-      border: none;
-      padding: 14px 24px;
-      color: #000;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 6px;
-      display: block;
-      margin: 0 auto;
-      transition: background-color 0.3s ease;
+      background-color: #fdd835; border: none; padding: 14px 24px; color: #000; font-size: 16px;
+      font-weight: bold; cursor: pointer; border-radius: 6px; display: block; margin: 0 auto;
+      transition: background-color .3s ease, transform .06s ease;
     }
-    button:disabled {
-      background-color: #ddd;
-      cursor: not-allowed;
+    button:disabled { background-color: #ddd; cursor: not-allowed; }
+    button:hover:not(:disabled) { background-color: #fbc02d; }
+    button:active:not(:disabled) { transform: translateY(1px); }
+
+    @media (max-width: 480px) { form { padding: 20px; } .info-banner { margin: 10px 16px 0; } }
+
+    /* Botão WhatsApp */
+    .whatsapp-float {
+      position: fixed; bottom: 20px; right: 20px; background-color: #25D366; border-radius: 50%;
+      width: 60px; height: 60px; display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); z-index: 999; transition: transform .3s ease;
     }
-    button:hover:not(:disabled) {
-      background-color: #fbc02d;
-    }
-    @media (max-width: 480px) {
-      form {
-        padding: 20px;
-      }
-    }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    .whatsapp-float img { width: 32px; height: 32px; }
   </style>
 </head>
 <body>
   <header>
-    <img src="/thumb.png" alt="Logo Jamaro" />
+    <img src="/jamaro-admin/public/img/5.png" alt="Logo Jamaro" />
   </header>
+
   <h1>Formulário de Inscrição - Jamaro Cup</h1>
-  <nav>
-    <a href="/admin">Painel de Admin</a>
-  </nav>
+
+  <!-- Banner de categoria selecionada e valor -->
+  <div id="categoryBanner" class="info-banner" hidden>
+    <strong id="bannerCategory">Categoria selecionada: —</strong>
+    <span class="dot">•</span>
+    <span id="bannerPrice">Valor: R$ 300,00 a dupla</span>
+  </div>
 
   <form id="inscricaoForm" action="/submit" method="POST" enctype="multipart/form-data">
     <!-- Atleta 1 -->
@@ -140,10 +121,7 @@
       <input type="text" id="city1" name="city1" readonly required />
       <label for="kit1">Kit (Tamanho)</label>
       <select id="kit1" name="entry.kit1" required>
-        <option value="">Selecione...</option>
-        <option value="M">M</option>
-        <option value="G">G</option>
-        <option value="GG">GG</option>
+        <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
       </select>
     </fieldset>
 
@@ -162,10 +140,7 @@
       <input type="text" id="city2" name="city2" readonly required />
       <label for="kit2">Kit (Tamanho)</label>
       <select id="kit2" name="entry.kit2" required>
-        <option value="">Selecione...</option>
-        <option value="M">M</option>
-        <option value="G">G</option>
-        <option value="GG">GG</option>
+        <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
       </select>
     </fieldset>
 
@@ -185,35 +160,59 @@
         <option value="Misto Principiante">Misto Principiante</option>
         <option value="Misto Iniciante">Misto Iniciante</option>
       </select>
+      
+
+      <!-- Box informativo da categoria selecionada -->
+      <div id="categoriaInfo" class="categoria-info">
+        <strong>Informações da categoria</strong>
+        <div id="categoriaInfoText">Selecione uma categoria para ver os detalhes.</div>
+      </div>
+
       <label for="instagram">Instagram da Dupla</label>
       <input type="text" id="instagram" name="entry.622151674" />
     </fieldset>
 
-    <!-- Termo de Consentimento -->
+    <!-- Termo de Consentimento (texto completo) -->
     <fieldset>
       <legend>Termo de Consentimento</legend>
       <div class="termo">
         <strong>Termo de Consentimento - 4ª Jamaro Cup</strong><br><br>
-        Inscrição implica aceitação completa deste termo.
-        <ol>
-          <li>Reembolso em até 7 dias.</li>
-          <li>Desclassificação sem reembolso.</li>
-          <li>Uniforme final, sem trocas exceto por defeito.</li>
-          <li>Uso de imagem para divulgação.</li>
-        </ol>
+        Ao se inscrever na 4ª Jamaro Cup, o atleta e/ou sua dupla declara ter lido e concordado com todos os termos e condições descritos abaixo.<br><br>
+
+        <strong>1. Reembolso de Inscrição:</strong><br>
+        O atleta tem o direito de solicitar o reembolso integral da taxa de inscrição em até 7 dias após a data de confirmação do pagamento.<br>
+        Para solicitar o reembolso, o atleta deve enviar um e-mail para <em>jamarocup@gmail.com</em> com o assunto "Reembolso 4ª Jamaro Cup", informando o nome completo do atleta e o comprovante de pagamento.<br>
+        Após o prazo de 7 dias, a organização não fará qualquer reembolso, independentemente do motivo da desistência.<br><br>
+
+        <strong>2. Nível de Categoria e Desclassificação:</strong><br>
+        As duplas devem se inscrever na categoria que melhor representa o seu nível técnico.<br>
+        A organização da 4ª Jamaro Cup se reserva o direito de avaliar o nível dos atletas inscritos.<br>
+        Caso uma dupla seja identificada com um nível técnico acima da categoria em que se inscreveu, ela será desclassificada imediatamente do torneio.<br>
+        A desclassificação por nível técnico não dará direito a reembolso da taxa de inscrição e nem a remanejamento para outra categoria.<br><br>
+
+        <strong>3. Uniformes:</strong><br>
+        Ao escolher o tamanho do uniforme no ato da inscrição, o atleta concorda que esta é uma decisão final e que não haverá direito à troca de tamanho, salvo em casos de defeito de fabricação comprovado.<br>
+        Para que a produção dos uniformes seja feita de forma eficiente, a organização não se responsabiliza por tamanhos incorretos escolhidos pelos atletas.<br><br>
+
+        <strong>4. Consentimento:</strong><br>
+        O atleta e/ou sua dupla está ciente e concorda com as regras de reembolso, desclassificação por nível de categoria e uniformes.<br>
+        A inscrição na 4ª Jamaro Cup implica na aceitação completa deste termo.
       </div>
-      <label for="acceptTerms">Você aceita o termo?</label>
-      <select id="acceptTerms" name="acceptTerms" required>
-        <option value="">Selecione...</option>
-        <option value="Sim">Sim</option>
-        <option value="Não">Não</option>
-      </select>
+
+      <!-- Checkbox moderno para aceitar termos -->
+      <div class="accept-row">
+        <input type="checkbox" id="acceptTerms" name="acceptTerms" value="Sim" required />
+        <label for="acceptTerms">
+          Li e aceito o Termo de Consentimento e autorizo o uso de imagem para fins de divulgação do evento.
+        </label>
+      </div>
+      <div class="hint">O envio só será permitido após aceitar os termos.</div>
     </fieldset>
 
     <!-- Comprovante -->
     <fieldset>
       <legend>Comprovante de Pagamento</legend>
-      <label for="paymentProof">Envie comprovante (PIX/Boleto)</label>
+      <label for="paymentProof">Envie comprovante (PIX)</label>
       <input type="file" id="paymentProof" name="paymentProof" accept="image/*,.pdf" required />
     </fieldset>
 
@@ -222,9 +221,9 @@
 
   <script>
     // Libera o botão apenas se aceitar os termos
-    document.getElementById('acceptTerms').addEventListener('change', function() {
-      document.getElementById('submitBtn').disabled = this.value !== 'Sim';
-    });
+    const accept = document.getElementById('acceptTerms');
+    const submitBtn = document.getElementById('submitBtn');
+    accept.addEventListener('change', function(){ submitBtn.disabled = !this.checked; });
 
     // Preenche cidade pelo CEP
     async function buscaCidade(cepInput, cityField) {
@@ -234,47 +233,70 @@
         const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await res.json();
         if (!data.erro) document.getElementById(cityField).value = data.localidade;
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     }
     document.getElementById('cep1').addEventListener('blur', e => buscaCidade(e.target.value, 'city1'));
     document.getElementById('cep2').addEventListener('blur', e => buscaCidade(e.target.value, 'city2'));
 
-    // Evita clique duplo no envio
-    document.getElementById('inscricaoForm').addEventListener('submit', function () {
-      document.getElementById('submitBtn').disabled = true;
+    // Evita clique duplo
+    document.getElementById('inscricaoForm').addEventListener('submit', function(){ submitBtn.disabled = true; });
+
+    // --- Mensagens por categoria ---
+    const categoryInfo = {
+      "Aprendiz": "Esta categoria é voltada para quem está iniciando na modalidade e ainda não possui experiência em torneios.",
+      "Iniciante B": "Categoria para atletas com pouca experiência competitiva, focada em desenvolvimento técnico básico.",
+      "Iniciante A": "Para atletas em transição para o nível intermediário, com fundamentos já consolidados.",
+      "Intermediário": "Voltada a atletas com boa técnica e experiência de jogo, exigindo regularidade e leitura tática.",
+      "Sub-21": "Categoria destinada para atletas com até 21 anos completos",
+      "Misto Principiante": "Duplas mistas com atletas em fase inicial da modalidade. Espírito de aprendizado acima de tudo.",
+      "Misto Iniciante": "Duplas mistas com atletas iniciantes em evolução, tolerando variação de níveis entre os parceiros."
+    };
+
+    // Normalizador p/ tratar acentos nas comparações
+    function normalize(str){ return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : ''; }
+
+    // Preenchimento de categoria via URL + banner + box informativo
+    const params = new URLSearchParams(location.search);
+    const cat = params.get('categoria');
+    const select = document.getElementById('category');
+    const banner = document.getElementById('categoryBanner');
+    const bannerCategory = document.getElementById('bannerCategory');
+    const catBox = document.getElementById('categoriaInfo');
+    const catText = document.getElementById('categoriaInfoText');
+
+    function applyCategoryUI(valueFromUrl){
+      let found = false;
+      [...select.options].forEach(opt => {
+        if (!found && (opt.value.toLowerCase() === valueFromUrl.toLowerCase() ||
+                       normalize(opt.value).toLowerCase() === normalize(valueFromUrl).toLowerCase())) {
+          select.value = opt.value; found = true;
+        }
+      });
+      // Banner sempre visível quando há tentativa de categoria
+      banner.hidden = false;
+      bannerCategory.textContent = 'Categoria selecionada: ' + (found ? select.value : valueFromUrl);
+
+      // Informações de categoria
+      const key = found ? select.value : valueFromUrl;
+      const text = categoryInfo[key] || "Selecione uma categoria para ver os detalhes.";
+      catText.textContent = text;
+      catBox.style.display = 'block';
+    }
+
+    if (cat) applyCategoryUI(cat);
+
+    // Atualiza textos ao mudar manualmente
+    select.addEventListener('change', () => {
+      banner.hidden = false;
+      bannerCategory.textContent = 'Categoria selecionada: ' + select.value;
+      catText.textContent = categoryInfo[select.value] || "Selecione uma categoria para ver os detalhes.";
+      catBox.style.display = 'block';
     });
   </script>
 
-  <!-- Botão flutuante do WhatsApp -->
+  <!-- WhatsApp flutuante -->
   <a class="whatsapp-float" href="https://wa.me/5517997237635" target="_blank" title="Fale com a organização">
     <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
   </a>
-
-  <style>
-    .whatsapp-float {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #25D366;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      z-index: 999;
-      transition: transform 0.3s ease;
-    }
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-    }
-    .whatsapp-float img {
-      width: 32px;
-      height: 32px;
-    }
-  </style>
 </body>
 </html>
