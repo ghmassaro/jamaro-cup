@@ -9,7 +9,7 @@ const nodemailer = require('nodemailer');
 try { require('dotenv').config(); } catch (_) {}
 
 const { sequelize } = require('./db');
-const { Entry } = require('./models/Entry');
+const { Entry } = require('./models/entry');
 
 
 const app = express();
