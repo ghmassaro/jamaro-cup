@@ -11,6 +11,7 @@ try { require('dotenv').config(); } catch (_) {}
 const { sequelize } = require('./db');
 const { Entry } = require('./models/Entry');
 
+
 const app = express();
 
 // === Dirs ===
