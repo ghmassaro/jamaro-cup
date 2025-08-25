@@ -212,6 +212,7 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
 });
 
 // === Admin: lista + filtros + totais de uniformes ===
+// === Admin: lista + filtros + totais de uniformes ===
 app.get('/admin', async (req, res) => {
   const category = (req.query.category || '').trim();
   const status   = (req.query.status   || '').trim();
@@ -222,13 +223,22 @@ app.get('/admin', async (req, res) => {
 
   const entries = await Entry.findAll({
     where,
-    order: [['submittedAt', 'DESC']]
+    order: [['submittedAt', 'DESC']],
+    raw: true,              // <-- ADICIONE
   });
 
   // listas para os <select>
-  const categoriesRaw = await Entry.findAll({ attributes: ['duo_category'], group: ['duo_category'] });
-  const categories = categoriesRaw.map(r => r.duo_category).filter(Boolean).sort();
-  const statuses   = ['pending_review', 'accepted', 'rejected', 'duplicate'];
+  const categoriesRaw = await Entry.findAll({
+    attributes: ['duo_category'],
+    group: ['duo_category'],
+    raw: true,              // <-- ADICIONE
+  });
+  const categories = categoriesRaw
+    .map(r => r.duo_category)
+    .filter(Boolean)
+    .sort();
+
+  const statuses = ['pending_review', 'accepted', 'rejected', 'duplicate'];
 
   // totais de uniformes
   const uniformTotals = {};
@@ -252,9 +262,10 @@ app.get('/admin', async (req, res) => {
     categories,
     statuses,
     selected: { category, status },
-    uniformTotals
+    uniformTotals,
   });
 });
+
 
 // === Exportar Excel respeitando filtros (/admin/export.xlsx) ===
 app.get('/admin/export.xlsx', async (req, res) => {
