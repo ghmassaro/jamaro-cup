@@ -211,7 +211,7 @@ app.post('/submit', upload.single('paymentProof'), async (req, res) => {
   }
 });
 
-
+// === Admin: lista + filtros + totais de uniformes ===
 // === Admin: lista + filtros + totais de uniformes ===
 app.get('/admin', async (req, res) => {
   const category = (req.query.category || '').trim();
@@ -241,30 +241,21 @@ app.get('/admin', async (req, res) => {
   const statuses = ['pending_review', 'accepted', 'rejected', 'duplicate'];
 
   // totais de uniformes
-// totais de uniformes (tamanho + gênero)
-const uniformTotals = {};
-const addKit = (size, gender) => {
-  const label = ['Kit', (size || '').trim(), (gender || '').trim()]
-    .filter(Boolean)
-    .join(' ');
-  const key = normalizeKit(label);
-  if (!key) return;
-  uniformTotals[key] = (uniformTotals[key] || 0) + 1;
-};
-
-for (const e of entries) {
-  // novos campos vindos do formulário
-  addKit(e.athlete1_kit, e.athlete1_kit_gender);
-  addKit(e.athlete2_kit, e.athlete2_kit_gender);
-
-  // compatibilidade com envios antigos (string "M / G" sem gênero)
-  if (typeof e.uniforms === 'string' && e.uniforms.includes('/')) {
-    const [k1, k2] = e.uniforms.split('/').map(s => (s || '').trim()).filter(Boolean);
-    if (k1) addKit(k1, null);
-    if (k2) addKit(k2, null);
+  const uniformTotals = {};
+  const addKit = (raw) => {
+    const key = normalizeKit(raw);
+    if (!key) return;
+    uniformTotals[key] = (uniformTotals[key] || 0) + 1;
+  };
+  for (const e of entries) {
+    if (e.athlete1_kit) addKit(e.athlete1_kit);
+    if (e.athlete2_kit) addKit(e.athlete2_kit);
+    if (typeof e.uniforms === 'string' && e.uniforms.includes('/')) {
+      const [k1, k2] = e.uniforms.split('/').map(s => s && s.trim()).filter(Boolean);
+      if (k1) addKit(k1);
+      if (k2) addKit(k2);
+    }
   }
-}
-
 
   res.render('admin', {
     entries,
