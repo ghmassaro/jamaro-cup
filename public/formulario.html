@@ -95,51 +95,75 @@
   <form id="inscricaoForm" action="/submit" method="POST" enctype="multipart/form-data" novalidate>
     <!-- Atleta 1 -->
     <fieldset>
-      <legend>Atleta 1</legend>
-      <label for="nome1">Nome Completo</label>
-      <input type="text" id="nome1" name="entry.857165334" required />
+  <legend>Atleta 1</legend>
+  <label for="nome1">Nome Completo</label>
+  <input type="text" id="nome1" name="entry.857165334" required />
 
-      <label for="tel1">Telefone</label>
-      <input type="tel" id="tel1" name="entry.222222222" required placeholder="(11) 99999-9999" inputmode="numeric" />
+  <label for="tel1">Telefone</label>
+  <input type="tel" id="tel1" name="entry.222222222" required placeholder="(11) 99999-9999" inputmode="numeric" />
 
-      <label for="email1">E-mail</label>
-      <input type="email" id="email1" name="entry.444444444" required />
+  <label for="email1">E-mail</label>
+  <input type="email" id="email1" name="entry.444444444" required />
 
-      <label for="cep1">CEP</label>
-      <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
+  <label for="cep1">CEP</label>
+  <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
 
-      <label for="city1">Cidade</label>
-      <input type="text" id="city1" name="city1" readonly autocomplete="address-level2" />
+  <label for="city1">Cidade</label>
+  <input type="text" id="city1" name="city1" readonly autocomplete="address-level2" />
 
-      <label for="kit1">Kit (Tamanho)</label>
-      <select id="kit1" name="entry.kit1" required>
-        <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
-      </select>
-    </fieldset>
+  <label for="kit1">Kit (Tamanho)</label>
+  <select id="kit1" name="entry.kit1" required>
+    <option value="">Selecione...</option>
+    <option value="P">P</option>
+    <option value="M">M</option>
+    <option value="G">G</option>
+    <option value="GG">GG</option>
+  </select>
+
+  <label>Modelo do uniforme</label>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <label><input type="radio" name="entry.kit1_gender" value="Masculino" required> Masculino</label>
+    <label><input type="radio" name="entry.kit1_gender" value="Feminino"> Feminino</label>
+    <label><input type="radio" name="entry.kit1_gender" value="Unissex"> Unissex</label>
+  </div>
+</fieldset>
+
 
     <!-- Atleta 2 -->
     <fieldset>
-      <legend>Atleta 2</legend>
-      <label for="nome2">Nome Completo</label>
-      <input type="text" id="nome2" name="entry.949098972" required />
+  <legend>Atleta 1</legend>
+  <label for="nome1">Nome Completo</label>
+  <input type="text" id="nome1" name="entry.857165334" required />
 
-      <label for="tel2">Telefone</label>
-      <input type="tel" id="tel2" name="entry.333333333" required placeholder="(11) 99999-9999" inputmode="numeric" />
+  <label for="tel1">Telefone</label>
+  <input type="tel" id="tel1" name="entry.222222222" required placeholder="(11) 99999-9999" inputmode="numeric" />
 
-      <label for="email2">E-mail</label>
-      <input type="email" id="email2" name="entry.555555555" required />
+  <label for="email1">E-mail</label>
+  <input type="email" id="email1" name="entry.444444444" required />
 
-      <label for="cep2">CEP</label>
-      <input type="text" id="cep2" name="entry.cep2" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
+  <label for="cep1">CEP</label>
+  <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
 
-      <label for="city2">Cidade</label>
-      <input type="text" id="city2" name="city2" readonly autocomplete="address-level2" />
+  <label for="city1">Cidade</label>
+  <input type="text" id="city1" name="city1" readonly autocomplete="address-level2" />
 
-      <label for="kit2">Kit (Tamanho)</label>
-      <select id="kit2" name="entry.kit2" required>
-        <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
-      </select>
-    </fieldset>
+  <label for="kit1">Kit (Tamanho)</label>
+  <select id="kit1" name="entry.kit1" required>
+    <option value="">Selecione...</option>
+    <option value="P">P</option>
+    <option value="M">M</option>
+    <option value="G">G</option>
+    <option value="GG">GG</option>
+  </select>
+
+  <label>Modelo do uniforme</label>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <label><input type="radio" name="entry.kit1_gender" value="Masculino" required> Masculino</label>
+    <label><input type="radio" name="entry.kit1_gender" value="Feminino"> Feminino</label>
+    <label><input type="radio" name="entry.kit1_gender" value="Unissex"> Unissex</label>
+  </div>
+</fieldset>
+
 
     <!-- Dados da Dupla -->
     <fieldset>

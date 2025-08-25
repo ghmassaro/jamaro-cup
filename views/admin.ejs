@@ -28,175 +28,167 @@
   </style>
 </head>
 <body>
-  <%
-    // Recebidos do servidor já em "raw: true"
-    const $sel = (typeof selected !== 'undefined' && selected) ? selected : {};
-    const $all = (entries || []).slice().reverse();
+<%
+  const $sel = selected || {};
+  const $all = (entries || []).slice().reverse();
 
-    // Coleta de categorias vindas do servidor (já calculado), com fallback
-    const $categories = (typeof categories !== 'undefined' && categories.length)
-      ? categories
-      : Array.from(new Set($all.map(e => e.duo_category).filter(Boolean))).sort();
+  const $categories = categories && categories.length
+    ? categories
+    : Array.from(new Set($all.map(e => e.duo_category).filter(Boolean))).sort();
 
-    const $statuses = (typeof statuses !== 'undefined' && statuses.length)
-      ? statuses
-      : ['pending_review','accepted','rejected','duplicate'];
+  const $statuses = statuses && statuses.length
+    ? statuses
+    : ['pending_review','accepted','rejected','duplicate'];
 
-    // Filtro local (além do filtro feito no servidor)
-    const $filtered = $all.filter(e => {
-      const okCategory = !$sel.category || e.duo_category === $sel.category;
-      const okStatus   = !$sel.status   || e.status === $sel.status;
-      return okCategory && okStatus;
-    });
+  const $filtered = $all.filter(e => {
+    const okCategory = !$sel.category || e.duo_category === $sel.category;
+    const okStatus   = !$sel.status   || e.status === $sel.status;
+    return okCategory && okStatus;
+  });
 
-    // Totais de uniforme (o servidor já envia 'uniformTotals', mas mantemos local p/ fallback)
-    const normalizeKit = (str) => {
-      if (!str) return '';
-      let s = String(str).trim().replace(/\s+/g,' ');
-      if (!/^kit\b/i.test(s)) s = 'Kit ' + s;
-      s = s.replace(/\b(pp|p|m|g{1,3}|xg|xxg)\b/gi, m => m.toUpperCase());
-      s = s.replace(/\b(masculino|feminino|unissex|adulto|infantil)\b/gi, w => w[0].toUpperCase()+w.slice(1).toLowerCase());
-      s = s.replace(/^kit\b/i,'Kit');
-      return s;
-    };
-    const $uniformTotalsLocal = {};
-    const add = (k) => { if (!k) return; $uniformTotalsLocal[k] = ($uniformTotalsLocal[k]||0)+1; };
-    for (const e of $filtered) {
-      if (e.athlete1_kit) add(normalizeKit(e.athlete1_kit));
-      if (e.athlete2_kit) add(normalizeKit(e.athlete2_kit));
-      if (typeof e.uniforms === 'string' && e.uniforms.includes('/')) {
-        const [k1,k2] = e.uniforms.split('/').map(s=>normalizeKit((s||'').trim()));
-        add(k1); add(k2);
-      }
+  const normalizeKit = (str) => {
+    if (!str) return '';
+    let s = String(str).trim().replace(/\s+/g,' ');
+    if (!/^kit\b/i.test(s)) s = 'Kit ' + s;
+    s = s.replace(/\b(pp|p|m|g{1,3}|xg|xxg)\b/gi, m => m.toUpperCase());
+    s = s.replace(/\b(masculino|feminino|unissex|adulto|infantil)\b/gi, w => w[0].toUpperCase()+w.slice(1).toLowerCase());
+    s = s.replace(/^kit\b/i,'Kit');
+    return s;
+  };
+
+  const $uniformTotals = {};
+  const addKit = (size, gender) => {
+    if (!size) return;
+    const label = ['Kit', size, gender].filter(Boolean).join(' ');
+    const key = normalizeKit(label);
+    $uniformTotals[key] = ($uniformTotals[key] || 0) + 1;
+  };
+  for (const e of $filtered) {
+    addKit(e.athlete1_kit, e.athlete1_kit_gender);
+    addKit(e.athlete2_kit, e.athlete2_kit_gender);
+    if (typeof e.uniforms === 'string' && e.uniforms.includes('/')) {
+      const [k1,k2] = e.uniforms.split('/').map(s => (s||'').trim());
+      if (k1) addKit(k1, null);
+      if (k2) addKit(k2, null);
     }
-    const $uniformTotals = (typeof uniformTotals !== 'undefined' && Object.keys(uniformTotals||{}).length)
-      ? uniformTotals
-      : $uniformTotalsLocal;
-  %>
+  }
+%>
 
-  <h1>
-    <span>Admin — Inscrições</span>
-    <a class="btn" href="/admin/export.xlsx<%= ($sel.category || $sel.status) ? ('?'+ new URLSearchParams({category:$sel.category||'',status:$sel.status||''}).toString()) : '' %>">
-      Exportar Excel
-    </a>
-  </h1>
+<h1>
+  <span>Admin — Inscrições</span>
+  <a class="btn" href="/admin/export.xlsx<%= ($sel.category || $sel.status) ? ('?'+ new URLSearchParams({category:$sel.category||'',status:$sel.status||''}).toString()) : '' %>">
+    Exportar Excel
+  </a>
+</h1>
 
-  <div class="muted">Score = confiança da validação automática (0–100). Em imagens (sem OCR) tende a ser baixo/0.</div>
+<div class="muted">Score = confiança da validação automática (0–100).</div>
 
-  <!-- Filtros -->
-  <form class="filters" method="GET" action="/admin">
-    <label>
-      Categoria:
-      <select name="category">
-        <option value="">Todas</option>
-        <% $categories.forEach(c => { %>
-          <option value="<%= c %>" <%= $sel.category === c ? 'selected' : '' %>><%= c %></option>
-        <% }) %>
-      </select>
-    </label>
-
-    <label>
-      Status:
-      <select name="status">
-        <option value="">Todos</option>
-        <% $statuses.forEach(s => { %>
-          <option value="<%= s %>" <%= $sel.status === s ? 'selected' : '' %>><%= s %></option>
-        <% }) %>
-      </select>
-    </label>
-
-    <button class="btn" type="submit">Filtrar</button>
-    <% if ($sel.category || $sel.status) { %>
-      <a class="btn" href="/admin">Limpar</a>
-    <% } %>
-  </form>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Dupla / Categoria</th>
-        <th>Atleta 1</th>
-        <th>Atleta 2</th>
-        <th>Cidades</th>
-        <th>Uniformes</th>
-        <th>Comprovante</th>
-        <th>Score</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% $filtered.forEach(e => { %>
-        <tr>
-          <td><%= e.submittedAt ? new Date(e.submittedAt).toLocaleString('pt-BR') : '-' %></td>
-
-          <td>
-            <div><strong><%= e.duo_name || '-' %></strong></div>
-            <div><small>Categoria: <%= e.duo_category || '-' %></small></div>
-          </td>
-
-          <td>
-            <div><strong><%= e.athlete1_name || '-' %></strong></div>
-            <div><%= e.athlete1_email || '' %></div>
-            <div><small><%= e.athlete1_phone || '' %></small></div>
-          </td>
-
-          <td>
-            <div><strong><%= e.athlete2_name || '-' %></strong></div>
-            <div><%= e.athlete2_email || '' %></div>
-            <div><small><%= e.athlete2_phone || '' %></small></div>
-          </td>
-
-          <td>
-            <div><small>A1: <%= e.athlete1_city || '-' %></small></div>
-            <div><small>A2: <%= e.athlete2_city || '-' %></small></div>
-          </td>
-
-          <td>
-            <ul class="compact">
-              <% if (e.athlete1_kit) { %><li>1 <%= e.athlete1_kit %></li><% } %>
-              <% if (e.athlete2_kit) { %><li>1 <%= e.athlete2_kit %></li><% } %>
-            </ul>
-          </td>
-
-          <td>
-            <% if (e.paymentProofUrl) { %>
-              <a class="link" href="<%= e.paymentProofUrl %>" target="_blank">Abrir</a>
-            <% } else { %>-<% } %>
-          </td>
-
-          <td><%= (e.validation_score != null) ? e.validation_score : '-' %></td>
-          <td class="status <%= e.status %>"><%= e.status %></td>
-
-          <td class="actions">
-            <form method="POST" action="/admin/entries/<%= e.id %>/approve">
-              <button class="btn" type="submit">Aprovar</button>
-            </form>
-            <form method="POST" action="/admin/entries/<%= e.id %>/reject">
-              <button class="btn" type="submit">Reprovar</button>
-            </form>
-          </td>
-        </tr>
+<form class="filters" method="GET" action="/admin">
+  <label>
+    Categoria:
+    <select name="category">
+      <option value="">Todas</option>
+      <% $categories.forEach(c => { %>
+        <option value="<%= c %>" <%= $sel.category === c ? 'selected' : '' %>><%= c %></option>
       <% }) %>
-    </tbody>
+    </select>
+  </label>
+  <label>
+    Status:
+    <select name="status">
+      <option value="">Todos</option>
+      <% $statuses.forEach(s => { %>
+        <option value="<%= s %>" <%= $sel.status === s ? 'selected' : '' %>><%= s %></option>
+      <% }) %>
+    </select>
+  </label>
+  <button class="btn" type="submit">Filtrar</button>
+  <% if ($sel.category || $sel.status) { %>
+    <a class="btn" href="/admin">Limpar</a>
+  <% } %>
+</form>
 
-    <tfoot>
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Dupla / Categoria</th>
+      <th>Atleta 1</th>
+      <th>Atleta 2</th>
+      <th>Cidades</th>
+      <th>Uniformes</th>
+      <th>Comprovante</th>
+      <th>Score</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% $filtered.forEach(e => { %>
       <tr>
-        <td colspan="10">
-          <div>Total de uniformes (lista atual):</div>
-          <% if (Object.keys($uniformTotals).length) { %>
-            <ul class="compact">
-              <% Object.keys($uniformTotals).sort().forEach(k => { %>
-                <li><%= $uniformTotals[k] %> <%= k %></li>
-              <% }) %>
-            </ul>
-          <% } else { %>
-            <div class="muted">Nenhum uniforme encontrado.</div>
-          <% } %>
+        <td><%= e.submittedAt ? new Date(e.submittedAt).toLocaleString('pt-BR') : '-' %></td>
+        <td>
+          <div><strong><%= e.duo_name || '-' %></strong></div>
+          <div><small>Categoria: <%= e.duo_category || '-' %></small></div>
+        </td>
+        <td>
+          <div><strong><%= e.athlete1_name || '-' %></strong></div>
+          <div><%= e.athlete1_email || '' %></div>
+          <div><small><%= e.athlete1_phone || '' %></small></div>
+        </td>
+        <td>
+          <div><strong><%= e.athlete2_name || '-' %></strong></div>
+          <div><%= e.athlete2_email || '' %></div>
+          <div><small><%= e.athlete2_phone || '' %></small></div>
+        </td>
+        <td>
+          <div><small>A1: <%= e.athlete1_city || '-' %></small></div>
+          <div><small>A2: <%= e.athlete2_city || '-' %></small></div>
+        </td>
+        <td>
+          <ul class="compact">
+            <% if (e.athlete1_kit) { %>
+              <li>Kit <%= e.athlete1_kit %><%= e.athlete1_kit_gender ? ` (${e.athlete1_kit_gender})` : '' %></li>
+            <% } %>
+            <% if (e.athlete2_kit) { %>
+              <li>Kit <%= e.athlete2_kit %><%= e.athlete2_kit_gender ? ` (${e.athlete2_kit_gender})` : '' %></li>
+            <% } %>
+          </ul>
+        </td>
+        <td>
+          <% if (e.paymentProofUrl) { %>
+            <a class="link" href="<%= e.paymentProofUrl %>" target="_blank">Abrir</a>
+          <% } else { %>-<% } %>
+        </td>
+        <td><%= (e.validation_score != null) ? e.validation_score : '-' %></td>
+        <td class="status <%= e.status %>"><%= e.status %></td>
+        <td class="actions">
+          <form method="POST" action="/admin/entries/<%= e.id %>/approve">
+            <button class="btn" type="submit">Aprovar</button>
+          </form>
+          <form method="POST" action="/admin/entries/<%= e.id %>/reject">
+            <button class="btn" type="submit">Reprovar</button>
+          </form>
         </td>
       </tr>
-    </tfoot>
-  </table>
+    <% }) %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="10">
+        <div>Total de uniformes (lista atual):</div>
+        <% if (Object.keys($uniformTotals).length) { %>
+          <ul class="compact">
+            <% Object.keys($uniformTotals).sort().forEach(k => { %>
+              <li><%= $uniformTotals[k] %> <%= k %></li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <div class="muted">Nenhum uniforme encontrado.</div>
+        <% } %>
+      </td>
+    </tr>
+  </tfoot>
+</table>
 </body>
 </html>
