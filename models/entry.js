@@ -50,4 +50,5 @@ const Entry = sequelize.define('Entry', {
   ],
 });
 
+
 module.exports = { Entry };
