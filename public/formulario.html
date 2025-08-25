@@ -80,7 +80,7 @@
 </head>
 <body>
   <header>
-    <img src="/jamaro-admin/public/img/5.png" alt="Logo Jamaro" />
+    <img src="/img/5.png" alt="Logo Jamaro" />
   </header>
 
   <h1>Formulário de Inscrição - Jamaro Cup</h1>
@@ -109,7 +109,7 @@
       <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
 
       <label for="city1">Cidade</label>
-      <input type="text" id="city1" name="city1" readonly required autocomplete="address-level2" />
+      <input type="text" id="city1" name="city1" readonly autocomplete="address-level2" />
 
       <label for="kit1">Kit (Tamanho)</label>
       <select id="kit1" name="entry.kit1" required>
@@ -133,7 +133,7 @@
       <input type="text" id="cep2" name="entry.cep2" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
 
       <label for="city2">Cidade</label>
-      <input type="text" id="city2" name="city2" readonly required autocomplete="address-level2" />
+      <input type="text" id="city2" name="city2" readonly autocomplete="address-level2" />
 
       <label for="kit2">Kit (Tamanho)</label>
       <select id="kit2" name="entry.kit2" required>
@@ -222,66 +222,57 @@
     const submitBtn = document.getElementById('submitBtn');
     accept.addEventListener('change', function(){ submitBtn.disabled = !this.checked; });
 
-    // ===== CEP: somente cidade, sem travar se CEP tem logradouro =====
-    function normalizeCEP(str) {
-      return (str || '').replace(/\D/g, '').slice(0, 8);
-    }
+    // ===== CEP: somente cidade, sem travar usuário =====
+    function normalizeCEP(str) { return (str || '').replace(/\D/g, '').slice(0, 8); }
 
     async function preencherCidadePorCEP(cepInputId, cityInputId) {
       const cepEl = document.getElementById(cepInputId);
       const cityEl = document.getElementById(cityInputId);
-      const raw = cepEl.value;
-      const cep = normalizeCEP(raw);
+      if (!cepEl || !cityEl) return;
+
+      const cep = normalizeCEP(cepEl.value);
 
       // Formatação visual 00000-000
-      if (cep.length >= 5) {
-        cepEl.value = cep.replace(/(\d{5})(\d{0,3})/, (_, a, b) => (b ? `${a}-${b}` : a));
-      } else {
-        cepEl.value = cep;
-      }
+      cepEl.value = cep.length > 5 ? `${cep.slice(0,5)}-${cep.slice(5)}` : cep;
 
-      // Validação básica
+      // Se não tiver 8 dígitos, permite o usuário digitar a cidade e sai
       if (cep.length !== 8) {
-        cityEl.value = '';
-        cepEl.setCustomValidity('Informe um CEP válido com 8 dígitos.');
-        cepEl.reportValidity();
+        cityEl.readOnly = false;
+        if (!cityEl.value) cityEl.placeholder = 'Digite sua cidade';
         return;
       }
-      cepEl.setCustomValidity('');
 
       try {
         const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        if (!res.ok) throw new Error('Falha na consulta do CEP');
         const data = await res.json();
-
-        if (data.erro) {
+        if (!data.erro && data.localidade) {
+          cityEl.value = data.localidade;
+          cityEl.readOnly = true;
+          cityEl.placeholder = '';
+        } else {
+          // CEP não encontrado: deixa editar manualmente
           cityEl.value = '';
-          cepEl.setCustomValidity('CEP não encontrado.');
-          cepEl.reportValidity();
-          return;
+          cityEl.readOnly = false;
+          cityEl.placeholder = 'Digite sua cidade';
         }
-
-        // Usa **somente** a cidade (localidade). Ignora logradouro/bairro.
-        cityEl.value = data.localidade || '';
-      } catch (e) {
-        cityEl.value = '';
-        cepEl.setCustomValidity('Não foi possível consultar o CEP. Tente novamente.');
-        cepEl.reportValidity();
+      } catch {
+        // Falhou a consulta: não trava; deixa editar
+        cityEl.readOnly = false;
+        if (!cityEl.value) cityEl.placeholder = 'Digite sua cidade';
       }
     }
 
     function attachCEPHandlers(cepId, cityId) {
       const el = document.getElementById(cepId);
+      if (!el) return;
       // Formata enquanto digita
       el.addEventListener('input', () => {
-        el.setCustomValidity('');
-        const onlyDigits = el.value.replace(/\D/g,'').slice(0,8);
-        el.value = onlyDigits.length > 5 ? `${onlyDigits.slice(0,5)}-${onlyDigits.slice(5)}` : onlyDigits;
+        const d = el.value.replace(/\D/g,'').slice(0,8);
+        el.value = d.length > 5 ? `${d.slice(0,5)}-${d.slice(5)}` : d;
       });
       // Busca cidade ao sair do campo
       el.addEventListener('blur', () => preencherCidadePorCEP(cepId, cityId));
     }
-
     attachCEPHandlers('cep1','city1');
     attachCEPHandlers('cep2','city2');
 
@@ -290,26 +281,21 @@
 
     function formatPhoneBR(value) {
       const d = (value || '').replace(/\D/g, '').slice(0, 11);
-      if (d.length <= 10) {
-        // Fixo: (AA) NNNN-NNNN
-        const p1 = d.slice(0,2);
-        const p2 = d.slice(2,6);
-        const p3 = d.slice(6,10);
+      if (d.length <= 10) { // fixo
+        const p1 = d.slice(0,2), p2 = d.slice(2,6), p3 = d.slice(6,10);
         if (d.length > 6) return `(${p1}) ${p2}-${p3}`;
         if (d.length > 2) return `(${p1}) ${p2}`;
         if (d.length > 0) return `(${p1}`;
         return '';
-      } else {
-        // Celular: (AA) 9NNNN-NNNN
-        const p1 = d.slice(0,2);
-        const p2 = d.slice(2,7);
-        const p3 = d.slice(7,11);
+      } else { // celular 11 dígitos
+        const p1 = d.slice(0,2), p2 = d.slice(2,7), p3 = d.slice(7,11);
         return `(${p1}) ${p2}-${p3}`;
       }
     }
 
     function attachPhoneMask(id) {
       const el = document.getElementById(id);
+      if (!el) return;
       el.addEventListener('input', () => {
         el.value = formatPhoneBR(el.value);
         el.setCustomValidity('');
@@ -323,18 +309,16 @@
         }
       });
     }
-
     attachPhoneMask('tel1');
     attachPhoneMask('tel2');
 
-    // ===== Evita clique duplo e valida CEP/Telefone no submit =====
+    // ===== Submit: verificação leve (não trava se ViaCEP cair) =====
     const form = document.getElementById('inscricaoForm');
-    form.addEventListener('submit', async (e) => {
-      // Valida telefones
+    form.addEventListener('submit', (e) => {
+      // Telefones
       const t1 = document.getElementById('tel1');
       const t2 = document.getElementById('tel2');
       let ok = true;
-
       [t1, t2].forEach(t => {
         if (!telRegex.test(t.value)) {
           t.setCustomValidity('Informe um telefone válido no formato (11) 99999-9999.');
@@ -345,82 +329,64 @@
         }
       });
 
-      // Valida CEPs (8 dígitos)
-      const c1 = document.getElementById('cep1');
-      const c2 = document.getElementById('cep2');
-      const onlyDigits1 = c1.value.replace(/\D/g,'');
-      const onlyDigits2 = c2.value.replace(/\D/g,'');
-      if (onlyDigits1.length !== 8) {
-        c1.setCustomValidity('Informe um CEP válido com 8 dígitos.');
-        c1.reportValidity();
-        ok = false;
-      } else {
-        c1.setCustomValidity('');
-      }
-      if (onlyDigits2.length !== 8) {
-        c2.setCustomValidity('Informe um CEP válido com 8 dígitos.');
-        c2.reportValidity();
-        ok = false;
-      } else {
-        c2.setCustomValidity('');
-      }
+      // CEPs: só checa comprimento; cidade pode ser digitada manualmente
+      const c1 = document.getElementById('cep1').value.replace(/\D/g,'');
+      const c2 = document.getElementById('cep2').value.replace(/\D/g,'');
+      if (c1.length !== 8 || c2.length !== 8) ok = false;
 
       if (!ok) {
         e.preventDefault();
         return;
       }
 
-      // trava envio duplo
+      // evita envio duplo
       submitBtn.disabled = true;
     });
 
-    // ===== Mensagens por categoria + preenchimento via URL =====
-    const categoryInfo = {
-      "Aprendiz": "Esta categoria é voltada para quem está iniciando na modalidade e ainda não possui experiência em torneios.",
-      "Iniciante B": "Categoria para atletas com pouca experiência competitiva, focada em desenvolvimento técnico básico.",
-      "Iniciante A": "Para atletas em transição para o nível intermediário, com fundamentos já consolidados.",
-      "Intermediário": "Voltada a atletas com boa técnica e experiência de jogo, exigindo regularidade e leitura tática.",
-      "Sub-21": "Categoria destinada para atletas com até 21 anos completos",
-      "Misto Principiante": "Duplas mistas com atletas em fase inicial da modalidade. Espírito de aprendizado acima de tudo.",
-      "Misto Iniciante": "Duplas mistas com atletas iniciantes em evolução, tolerando variação de níveis entre os parceiros."
-    };
+    // ===== Categoria via URL + texto informativo =====
+    (function(){
+      const infos = {
+        "Aprendiz": "Esta categoria é voltada para quem está iniciando na modalidade e ainda não possui experiência em torneios.",
+        "Iniciante B": "Categoria para atletas com pouca experiência competitiva, focada em desenvolvimento técnico básico.",
+        "Iniciante A": "Para atletas em transição para o nível intermediário, com fundamentos já consolidados.",
+        "Intermediário": "Voltada a atletas com boa técnica e experiência de jogo, exigindo regularidade e leitura tática.",
+        "Sub-21": "Categoria destinada para atletas com até 21 anos completos",
+        "Misto Principiante": "Duplas mistas com atletas em fase inicial da modalidade. Espírito de aprendizado acima de tudo.",
+        "Misto Iniciante": "Duplas mistas com atletas iniciantes em evolução, tolerando variação de níveis entre os parceiros."
+      };
+      function normalize(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
-    function normalize(str){ return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : ''; }
+      const params = new URLSearchParams(location.search);
+      const cat = params.get('categoria');
+      const select = document.getElementById('category');
+      const banner = document.getElementById('categoryBanner');
+      const bannerCategory = document.getElementById('bannerCategory');
+      const catBox = document.getElementById('categoriaInfo');
+      const catText = document.getElementById('categoriaInfoText');
 
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('categoria');
-    const select = document.getElementById('category');
-    const banner = document.getElementById('categoryBanner');
-    const bannerCategory = document.getElementById('bannerCategory');
-    const catBox = document.getElementById('categoriaInfo');
-    const catText = document.getElementById('categoriaInfoText');
-
-    function applyCategoryUI(valueFromUrl){
-      if (!valueFromUrl) return;
-      let found = false;
-      [...select.options].forEach(opt => {
-        if (!found && (opt.value.toLowerCase() === valueFromUrl.toLowerCase() ||
-                       normalize(opt.value).toLowerCase() === normalize(valueFromUrl).toLowerCase())) {
-          select.value = opt.value; found = true;
+      if (select) {
+        if (cat) {
+          let found = false;
+          [...select.options].forEach(o=>{
+            if (!found && (o.value.toLowerCase() === cat.toLowerCase() ||
+                           normalize(o.value).toLowerCase() === normalize(cat).toLowerCase())) {
+              select.value = o.value; found = true;
+            }
+          });
+          if (banner) banner.hidden = false;
+          if (bannerCategory) bannerCategory.textContent = 'Categoria selecionada: ' + (select.value || cat);
+          if (catBox) catBox.style.display = 'block';
+          if (catText) catText.textContent = infos[select.value || cat] || "Selecione uma categoria para ver os detalhes.";
         }
-      });
-      banner.hidden = false;
-      bannerCategory.textContent = 'Categoria selecionada: ' + (found ? select.value : valueFromUrl);
 
-      const key = found ? select.value : valueFromUrl;
-      const text = categoryInfo[key] || "Selecione uma categoria para ver os detalhes.";
-      catText.textContent = text;
-      catBox.style.display = 'block';
-    }
-
-    if (cat) applyCategoryUI(cat);
-
-    select.addEventListener('change', () => {
-      banner.hidden = false;
-      bannerCategory.textContent = 'Categoria selecionada: ' + select.value;
-      catText.textContent = categoryInfo[select.value] || "Selecione uma categoria para ver os detalhes.";
-      catBox.style.display = 'block';
-    });
+        select.addEventListener('change', ()=>{
+          if (banner) banner.hidden = false;
+          if (bannerCategory) bannerCategory.textContent = 'Categoria selecionada: ' + select.value;
+          if (catBox) catBox.style.display = 'block';
+          if (catText) catText.textContent = infos[select.value] || "Selecione uma categoria para ver os detalhes.";
+        });
+      }
+    })();
   </script>
 
   <!-- WhatsApp flutuante -->
