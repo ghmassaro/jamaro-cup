@@ -37,32 +37,19 @@
     }
     input:focus, select:focus { border-color: #fdd835; outline: none; box-shadow: 0 0 0 3px rgba(253,216,53,.25); }
 
-   /* Box amarelo reutilizável (termo e info de categoria) */
-.termo, .categoria-info {
-  font-size: 14px;
-  background: #fff8dc;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  border: 1px solid #e1c870;
-  line-height: 1.5;
-}
-
-.termo {
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-.categoria-info {
-  display: none; /* aparece via JS */
-  margin-top: 10px; /* <<< Espaço extra entre select e box */
-}
-
-.categoria-info strong {
-  display: block;
-  margin-bottom: 6px;
-}
-
+    /* Box amarelo reutilizável (termo e info de categoria) */
+    .termo, .categoria-info {
+      font-size: 14px;
+      background: #fff8dc;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #e1c870;
+      line-height: 1.5;
+    }
+    .termo { max-height: 240px; overflow-y: auto; }
+    .categoria-info { display: none; margin-top: 10px; }
+    .categoria-info strong { display: block; margin-bottom: 6px; }
 
     /* Checkbox de termos */
     .accept-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
@@ -105,20 +92,25 @@
     <span id="bannerPrice">Valor: R$ 300,00 a dupla</span>
   </div>
 
-  <form id="inscricaoForm" action="/submit" method="POST" enctype="multipart/form-data">
+  <form id="inscricaoForm" action="/submit" method="POST" enctype="multipart/form-data" novalidate>
     <!-- Atleta 1 -->
     <fieldset>
       <legend>Atleta 1</legend>
       <label for="nome1">Nome Completo</label>
       <input type="text" id="nome1" name="entry.857165334" required />
+
       <label for="tel1">Telefone</label>
-      <input type="tel" id="tel1" name="entry.222222222" required />
+      <input type="tel" id="tel1" name="entry.222222222" required placeholder="(11) 99999-9999" inputmode="numeric" />
+
       <label for="email1">E-mail</label>
       <input type="email" id="email1" name="entry.444444444" required />
+
       <label for="cep1">CEP</label>
-      <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required />
+      <input type="text" id="cep1" name="entry.cep1" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
+
       <label for="city1">Cidade</label>
-      <input type="text" id="city1" name="city1" readonly required />
+      <input type="text" id="city1" name="city1" readonly required autocomplete="address-level2" />
+
       <label for="kit1">Kit (Tamanho)</label>
       <select id="kit1" name="entry.kit1" required>
         <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
@@ -130,14 +122,19 @@
       <legend>Atleta 2</legend>
       <label for="nome2">Nome Completo</label>
       <input type="text" id="nome2" name="entry.949098972" required />
+
       <label for="tel2">Telefone</label>
-      <input type="tel" id="tel2" name="entry.333333333" required />
+      <input type="tel" id="tel2" name="entry.333333333" required placeholder="(11) 99999-9999" inputmode="numeric" />
+
       <label for="email2">E-mail</label>
       <input type="email" id="email2" name="entry.555555555" required />
+
       <label for="cep2">CEP</label>
-      <input type="text" id="cep2" name="entry.cep2" placeholder="00000-000" maxlength="9" required />
+      <input type="text" id="cep2" name="entry.cep2" placeholder="00000-000" maxlength="9" required inputmode="numeric" autocomplete="postal-code" />
+
       <label for="city2">Cidade</label>
-      <input type="text" id="city2" name="city2" readonly required />
+      <input type="text" id="city2" name="city2" readonly required autocomplete="address-level2" />
+
       <label for="kit2">Kit (Tamanho)</label>
       <select id="kit2" name="entry.kit2" required>
         <option value="">Selecione...</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option>
@@ -149,6 +146,7 @@
       <legend>Dados da Dupla</legend>
       <label for="duoName">Nome da Dupla</label>
       <input type="text" id="duoName" name="entry.111111111" required />
+
       <label for="category">Categoria</label>
       <select id="category" name="entry.666666666" required>
         <option value="">Selecione...</option>
@@ -160,7 +158,6 @@
         <option value="Misto Principiante">Misto Principiante</option>
         <option value="Misto Iniciante">Misto Iniciante</option>
       </select>
-      
 
       <!-- Box informativo da categoria selecionada -->
       <div id="categoriaInfo" class="categoria-info">
@@ -220,28 +217,164 @@
   </form>
 
   <script>
-    // Libera o botão apenas se aceitar os termos
+    // ===== Controle do botão de envio (aceitar termos) =====
     const accept = document.getElementById('acceptTerms');
     const submitBtn = document.getElementById('submitBtn');
     accept.addEventListener('change', function(){ submitBtn.disabled = !this.checked; });
 
-    // Preenche cidade pelo CEP
-    async function buscaCidade(cepInput, cityField) {
-      const cep = cepInput.replace(/\D/g, '');
-      if (cep.length !== 8) return;
+    // ===== CEP: somente cidade, sem travar se CEP tem logradouro =====
+    function normalizeCEP(str) {
+      return (str || '').replace(/\D/g, '').slice(0, 8);
+    }
+
+    async function preencherCidadePorCEP(cepInputId, cityInputId) {
+      const cepEl = document.getElementById(cepInputId);
+      const cityEl = document.getElementById(cityInputId);
+      const raw = cepEl.value;
+      const cep = normalizeCEP(raw);
+
+      // Formatação visual 00000-000
+      if (cep.length >= 5) {
+        cepEl.value = cep.replace(/(\d{5})(\d{0,3})/, (_, a, b) => (b ? `${a}-${b}` : a));
+      } else {
+        cepEl.value = cep;
+      }
+
+      // Validação básica
+      if (cep.length !== 8) {
+        cityEl.value = '';
+        cepEl.setCustomValidity('Informe um CEP válido com 8 dígitos.');
+        cepEl.reportValidity();
+        return;
+      }
+      cepEl.setCustomValidity('');
+
       try {
         const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        if (!res.ok) throw new Error('Falha na consulta do CEP');
         const data = await res.json();
-        if (!data.erro) document.getElementById(cityField).value = data.localidade;
-      } catch (e) { console.error(e); }
+
+        if (data.erro) {
+          cityEl.value = '';
+          cepEl.setCustomValidity('CEP não encontrado.');
+          cepEl.reportValidity();
+          return;
+        }
+
+        // Usa **somente** a cidade (localidade). Ignora logradouro/bairro.
+        cityEl.value = data.localidade || '';
+      } catch (e) {
+        cityEl.value = '';
+        cepEl.setCustomValidity('Não foi possível consultar o CEP. Tente novamente.');
+        cepEl.reportValidity();
+      }
     }
-    document.getElementById('cep1').addEventListener('blur', e => buscaCidade(e.target.value, 'city1'));
-    document.getElementById('cep2').addEventListener('blur', e => buscaCidade(e.target.value, 'city2'));
 
-    // Evita clique duplo
-    document.getElementById('inscricaoForm').addEventListener('submit', function(){ submitBtn.disabled = true; });
+    function attachCEPHandlers(cepId, cityId) {
+      const el = document.getElementById(cepId);
+      // Formata enquanto digita
+      el.addEventListener('input', () => {
+        el.setCustomValidity('');
+        const onlyDigits = el.value.replace(/\D/g,'').slice(0,8);
+        el.value = onlyDigits.length > 5 ? `${onlyDigits.slice(0,5)}-${onlyDigits.slice(5)}` : onlyDigits;
+      });
+      // Busca cidade ao sair do campo
+      el.addEventListener('blur', () => preencherCidadePorCEP(cepId, cityId));
+    }
 
-    // --- Mensagens por categoria ---
+    attachCEPHandlers('cep1','city1');
+    attachCEPHandlers('cep2','city2');
+
+    // ===== Telefone BR: máscara + validação (fixo/celular) =====
+    const telRegex = /^\(\d{2}\)\s?(?:9\d{4}|\d{4})-\d{4}$/; // (11) 99999-9999 ou (11) 9999-9999
+
+    function formatPhoneBR(value) {
+      const d = (value || '').replace(/\D/g, '').slice(0, 11);
+      if (d.length <= 10) {
+        // Fixo: (AA) NNNN-NNNN
+        const p1 = d.slice(0,2);
+        const p2 = d.slice(2,6);
+        const p3 = d.slice(6,10);
+        if (d.length > 6) return `(${p1}) ${p2}-${p3}`;
+        if (d.length > 2) return `(${p1}) ${p2}`;
+        if (d.length > 0) return `(${p1}`;
+        return '';
+      } else {
+        // Celular: (AA) 9NNNN-NNNN
+        const p1 = d.slice(0,2);
+        const p2 = d.slice(2,7);
+        const p3 = d.slice(7,11);
+        return `(${p1}) ${p2}-${p3}`;
+      }
+    }
+
+    function attachPhoneMask(id) {
+      const el = document.getElementById(id);
+      el.addEventListener('input', () => {
+        el.value = formatPhoneBR(el.value);
+        el.setCustomValidity('');
+      });
+      el.addEventListener('blur', () => {
+        if (el.value && !telRegex.test(el.value)) {
+          el.setCustomValidity('Informe um telefone válido no formato (11) 99999-9999.');
+          el.reportValidity();
+        } else {
+          el.setCustomValidity('');
+        }
+      });
+    }
+
+    attachPhoneMask('tel1');
+    attachPhoneMask('tel2');
+
+    // ===== Evita clique duplo e valida CEP/Telefone no submit =====
+    const form = document.getElementById('inscricaoForm');
+    form.addEventListener('submit', async (e) => {
+      // Valida telefones
+      const t1 = document.getElementById('tel1');
+      const t2 = document.getElementById('tel2');
+      let ok = true;
+
+      [t1, t2].forEach(t => {
+        if (!telRegex.test(t.value)) {
+          t.setCustomValidity('Informe um telefone válido no formato (11) 99999-9999.');
+          t.reportValidity();
+          ok = false;
+        } else {
+          t.setCustomValidity('');
+        }
+      });
+
+      // Valida CEPs (8 dígitos)
+      const c1 = document.getElementById('cep1');
+      const c2 = document.getElementById('cep2');
+      const onlyDigits1 = c1.value.replace(/\D/g,'');
+      const onlyDigits2 = c2.value.replace(/\D/g,'');
+      if (onlyDigits1.length !== 8) {
+        c1.setCustomValidity('Informe um CEP válido com 8 dígitos.');
+        c1.reportValidity();
+        ok = false;
+      } else {
+        c1.setCustomValidity('');
+      }
+      if (onlyDigits2.length !== 8) {
+        c2.setCustomValidity('Informe um CEP válido com 8 dígitos.');
+        c2.reportValidity();
+        ok = false;
+      } else {
+        c2.setCustomValidity('');
+      }
+
+      if (!ok) {
+        e.preventDefault();
+        return;
+      }
+
+      // trava envio duplo
+      submitBtn.disabled = true;
+    });
+
+    // ===== Mensagens por categoria + preenchimento via URL =====
     const categoryInfo = {
       "Aprendiz": "Esta categoria é voltada para quem está iniciando na modalidade e ainda não possui experiência em torneios.",
       "Iniciante B": "Categoria para atletas com pouca experiência competitiva, focada em desenvolvimento técnico básico.",
@@ -252,10 +385,8 @@
       "Misto Iniciante": "Duplas mistas com atletas iniciantes em evolução, tolerando variação de níveis entre os parceiros."
     };
 
-    // Normalizador p/ tratar acentos nas comparações
     function normalize(str){ return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : ''; }
 
-    // Preenchimento de categoria via URL + banner + box informativo
     const params = new URLSearchParams(location.search);
     const cat = params.get('categoria');
     const select = document.getElementById('category');
@@ -265,6 +396,7 @@
     const catText = document.getElementById('categoriaInfoText');
 
     function applyCategoryUI(valueFromUrl){
+      if (!valueFromUrl) return;
       let found = false;
       [...select.options].forEach(opt => {
         if (!found && (opt.value.toLowerCase() === valueFromUrl.toLowerCase() ||
@@ -272,11 +404,9 @@
           select.value = opt.value; found = true;
         }
       });
-      // Banner sempre visível quando há tentativa de categoria
       banner.hidden = false;
       bannerCategory.textContent = 'Categoria selecionada: ' + (found ? select.value : valueFromUrl);
 
-      // Informações de categoria
       const key = found ? select.value : valueFromUrl;
       const text = categoryInfo[key] || "Selecione uma categoria para ver os detalhes.";
       catText.textContent = text;
@@ -285,7 +415,6 @@
 
     if (cat) applyCategoryUI(cat);
 
-    // Atualiza textos ao mudar manualmente
     select.addEventListener('change', () => {
       banner.hidden = false;
       bannerCategory.textContent = 'Categoria selecionada: ' + select.value;
